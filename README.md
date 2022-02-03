@@ -39,6 +39,13 @@
        
        the power is calculated using the given formula 
           pr=pt+gt+gr-10*log(((4*pi.*d)/lamda).^n)-nfm.*3 
+          where 
+          pt : power transmitted 
+          gt : transmitter gain
+          gr : receiver gain
+          n : Free space path loss is assumed for channel characteristics with factor =3
+          nfm : Partition Attenuation Factor (PAF) per wall
+          
 
 
 #how to run the code 
