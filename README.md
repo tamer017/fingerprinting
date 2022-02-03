@@ -12,6 +12,8 @@
     .Partition Attenuation Factor (PAF) = 3 dB per wall. The stairs impact on the wireless channel 
     can be neglected. The AP transmission power is 20 dBm. Free space path loss is assumed for channel
     characteristics with factor =3. Grx and Gtx are unity gains. The carrier frequency (fc) = 2.4GHz.
+     
+     the lingth of the building is 52 meters and the width is 20 meters 
 
     the location of the Access points are :
     AP1 = [6,15.5625];
@@ -28,8 +30,9 @@
     16.5,4,3.5;34,16.5,4,3.5;38,16.5,4,3.5;42,16.5,4,3.5];
     
      value of the received power every 0.5 m  from the AP location and extended to the building area of coverage. 
-     these points are called reference point.
-    
+     these points are called reference points.
+     in this building we have 4160 reference points.
+     52*20*2*2 =4160
     the location of the receiver is calculated be comparing the power received at each reference pointand at the receiver point .
      computing the lest distance between the Reference point and the “fingerprints” using Root Mean Square(RMS) using the bellow formula:
   ![Capture](https://user-images.githubusercontent.com/83555471/152444830-12a97694-962c-4682-8193-23d68d3903b6.PNG)
