@@ -4,7 +4,8 @@
     This technique searches the given input signals pattern with all the other signals in the database and 
     match with the point whichcorresponds to the nearest neighbor in the signal hyperspace.
      
-    in this project i will find the location of a receiver in agiven area (2nd floor C3 building in GUC) using fingerprinting .
+    in this project i will find the location of a receiver in agiven area (2nd floor C3 building in GUC) using fingerprinting by
+    knowingthe power received from each Access point.
    ![Capture](https://user-images.githubusercontent.com/83555471/152442496-b79ff013-0002-471e-9555-708f28ca3be6.PNG)
 
     The above is 2nd floor C3 building in GUC; which is Indoor covered by 5 WLAN Access Points (AP)
@@ -32,4 +33,30 @@
     the location of the receiver is calculated be comparing the power received at each reference pointand at the receiver point .
      computing the lest distance between the Reference point and the “fingerprints” using Root Mean Square(RMS) using the bellow formula:
   ![Capture](https://user-images.githubusercontent.com/83555471/152444830-12a97694-962c-4682-8193-23d68d3903b6.PNG)
+       
+       the power is calculated using the given formula 
+          pr=pt+gt+gr-10*log(((4*pi.*d)/lamda).^n)-nfm.*3 
+
+
+#how to run the code 
+
+    enter the power received from each Access Point and the output will be your location and plot it 
+    in the graph and also Plot the value of the received power every 0.5 m (or any other reference point) from the AP
+    location and extended to the building area of coverage “Using contour function in MATLAB”.
+
+    for example if 
+     the power received from AP1 : -100
+     the power received from AP2 : -150
+     the power received from AP3 : -250
+     the power received from AP4 : -300
+     the power received from AP5 : -350
+     you are in location x = 5.5 and y = 15
+     
+![Capture2](https://user-images.githubusercontent.com/83555471/152445954-f103780d-387a-496e-8e8f-2a8c832067bb.PNG)
+
+![Capture1](https://user-images.githubusercontent.com/83555471/152445982-0f3bd91b-5d96-47c9-8610-854b837a3cde.PNG)
+
+     
+
+
 
