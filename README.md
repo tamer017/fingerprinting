@@ -56,7 +56,7 @@
 
 
 
-the red square is representing the receiver location 
+the red square is representing the receiver location which is very close tho the Ap1 and Ap2 since it receives the highest power from them
 
 ![Capture1](https://user-images.githubusercontent.com/83555471/152445982-0f3bd91b-5d96-47c9-8610-854b837a3cde.PNG)
 
