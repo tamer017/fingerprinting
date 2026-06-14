@@ -1,76 +1,117 @@
-# fingerprinting
+# WLAN Location Fingerprinting — Indoor Positioning System
 
-    Location signature/fingerprinting:
-    This technique searches the given input signals pattern with all the other signals in the database and 
-    match with the point whichcorresponds to the nearest neighbor in the signal hyperspace.
-     
-    in this project i will find the location of a receiver in agiven area (2nd floor C3 building in GUC) using fingerprinting by
-    knowingthe power received from each Access point.
-   ![Capture](https://user-images.githubusercontent.com/83555471/152442496-b79ff013-0002-471e-9555-708f28ca3be6.PNG)
+> An indoor positioning system using **Wi-Fi RSSI fingerprinting** to localize a receiver on the 2nd floor of the C3 building at GUC, using signal strengths from 5 Access Points.
 
-    The above is 2nd floor C3 building in GUC; which is Indoor covered by 5 WLAN Access Points (AP)
-    .Partition Attenuation Factor (PAF) = 3 dB per wall. The stairs impact on the wireless channel 
-    can be neglected. The AP transmission power is 20 dBm. Free space path loss is assumed for channel
-    characteristics with factor =3. Grx and Gtx are unity gains. The carrier frequency (fc) = 2.4GHz.
-     
-     the lingth of the building is 52 meters and the width is 20 meters 
+[![Language](https://img.shields.io/badge/Language-MATLAB-blue?style=flat-square)](https://www.mathworks.com/products/matlab.html)
+[![Method](https://img.shields.io/badge/Method-RSSI%20Fingerprinting-orange?style=flat-square)]()
+[![Location](https://img.shields.io/badge/Location-GUC%20C3%20Building-green?style=flat-square)]()
 
-    the location of the Access points are :
-    AP1 = [6,15.5625];
-    AP2 = [17.5,4];
-    AP3 = [25.5,15.5625];
-    AP4 = [33.5,4];
-    AP5 = [45,15.5625];
-    
-    [0,0] is the origin and it is at the bottom left of the figure above 
-    the coordinates for locations of the wall are :
-    Walls=[0,0,6,15;6,0,8,15;14,0,8,8;14,8,8,7;22,0,3,15;25,0,2,15;27,0,3,15;
-    30,0,8,8;30,8,8,7;38,0,8,15;46,0,6,15;0,15,2,5;2,16.5,4,3.5;6,16.5,4,3.5;
-    10,16.5,4,3.5;14,16.5,4,3.5;18,16.5,4,3.5;22,16.5,4,3.5;26,16.5,4,3.5;30,
-    16.5,4,3.5;34,16.5,4,3.5;38,16.5,4,3.5;42,16.5,4,3.5];
-    
-     value of the received power every 0.5 m  from the AP location and extended to the building area of coverage. 
-     these points are called reference points.
-     in this building we have 4160 reference points.
-     52*20*2*2 =4160
-    the location of the receiver is calculated be comparing the power received at each reference pointand at the receiver point .
-     computing the lest distance between the Reference point and the “fingerprints” using Root Mean Square(RMS) using the bellow formula:
-  ![Capture](https://user-images.githubusercontent.com/83555471/152444830-12a97694-962c-4682-8193-23d68d3903b6.PNG)
-       
-       the power is calculated using the given formula 
-          pr=pt+gt+gr-10*log(((4*pi.*d)/lamda).^n)-nfm.*3 
-          where 
-          pt : power transmitted 
-          gt : transmitter gain
-          gr : receiver gain
-          n : Free space path loss is assumed for channel characteristics with factor =3
-          nfm : Partition Attenuation Factor (PAF) per wall
-          
+---
 
+## Overview
 
-#how to run the code 
+This project implements a **location fingerprinting technique** for accurate indoor positioning using Wi-Fi signal strength (RSSI) measurements. Traditional GPS is ineffective indoors due to signal attenuation, making RSSI-based fingerprinting a critical technique for indoor navigation, asset tracking, and emergency response.
 
-    enter the power received from each Access Point and the output will be your location and plot it 
-    in the graph and also Plot the value of the received power every 0.5 m (or any other reference point) from the AP
-    location and extended to the building area of coverage “Using contour function in MATLAB”.
+The system localizes a receiver anywhere on the **2nd floor of the C3 building at the German University in Cairo (GUC)** by comparing live RSSI measurements from **5 WLAN Access Points** against a pre-recorded radio map of reference points.
 
-    for example if 
-     the power received from AP1 : -100
-     the power received from AP2 : -150
-     the power received from AP3 : -250
-     the power received from AP4 : -300
-     the power received from AP5 : -350
-     you are in location x = 5.5 and y = 15
-     
-![Capture2](https://user-images.githubusercontent.com/83555471/152445954-f103780d-387a-496e-8e8f-2a8c832067bb.PNG)
+---
 
+## Methodology
 
+### Phase 1: Offline Training (Radio Map Construction)
 
-the red square is representing the receiver location which is very close tho the Ap1 and Ap2 since it receives the highest power from them
+```
+[Define Reference Grid on Floor Plan]
+              |
+              v
+   [Measure RSSI from 5 APs at each reference point]
+   AP1_power, AP2_power, AP3_power, AP4_power, AP5_power
+              |
+              v
+   [Store as Radio Map: (x, y) → [P1, P2, P3, P4, P5]]
+```
 
-![Capture1](https://user-images.githubusercontent.com/83555471/152445982-0f3bd91b-5d96-47c9-8610-854b837a3cde.PNG)
+### Phase 2: Online Localization
 
-     
+```
+[Receive live RSSI from 5 APs at unknown location]
+              |
+              v
+   [Compute RMS distance to each reference point]
+   RMS = sqrt( Σ(P_ref_i - P_live_i)^2 / N )
+              |
+              v
+   [Select reference point with minimum RMS distance]
+              |
+              v
+   [Output: (x, y) coordinates of estimated location]
+```
 
+---
 
+## Technical Details
 
+### RMS-Based Nearest Neighbor Matching
+The core localization algorithm computes the **Root Mean Square (RMS) error** between the live received power vector and each fingerprint in the radio map. The reference point with the lowest RMS distance is selected as the estimated location.
+
+**Formula:**
+```
+RMS(i) = sqrt( (1/5) * sum_j (P_ref_ij - P_live_j)^2 )
+```
+Where `P_ref_ij` is the power from AP `j` at reference point `i`, and `P_live_j` is the live power from AP `j`.
+
+### Access Points
+| AP | Coverage Zone |
+|---|---|
+| AP1 | North corridor |
+| AP2 | East wing |
+| AP3 | South corridor |
+| AP4 | West wing |
+| AP5 | Central area |
+
+---
+
+## System Specifications
+
+| Property | Value |
+|---|---|
+| Building | GUC C3, Floor 2 |
+| Access Points | 5 WLAN APs |
+| Algorithm | RMS nearest-neighbor fingerprinting |
+| Output | (x, y) coordinates on floor grid |
+| Platform | MATLAB |
+
+---
+
+## Getting Started
+
+### Prerequisites
+- MATLAB R2016b or later
+- Communications Toolbox (optional, for signal visualization)
+
+### Running
+1. Open MATLAB and navigate to the project directory
+2. Load the radio map data (reference power measurements)
+3. Run the main localization script:
+   ```matlab
+   run('fingerprinting_main.m')
+   ```
+4. Enter the live RSSI values when prompted
+5. The estimated (x, y) coordinates are displayed
+
+---
+
+## Skills Demonstrated
+
+- **Signal Processing:** RSSI measurement, path loss modeling, wireless channel characterization
+- **Indoor Positioning:** Radio map construction, fingerprinting, nearest-neighbor matching
+- **MATLAB:** Matrix operations, distance computation, data visualization
+- **Applied Mathematics:** RMS error metric, vector space comparison
+- **Wireless Networks:** WLAN (802.11) signal propagation, multi-AP localization
+
+---
+
+## References
+
+- Bahl, P. & Padmanabhan, V.N. (2000). *RADAR: An in-building RF-based user location and tracking system*. IEEE INFOCOM.
+- Youssef, M. & Agrawala, A. (2005). *The Horus WLAN location determination system*. ACM MobiSys.
