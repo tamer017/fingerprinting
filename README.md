@@ -1,117 +1,119 @@
-# WLAN Location Fingerprinting — Indoor Positioning System
+# WLAN Indoor Positioning via RSSI Fingerprinting
 
-> An indoor positioning system using **Wi-Fi RSSI fingerprinting** to localize a receiver on the 2nd floor of the C3 building at GUC, using signal strengths from 5 Access Points.
+> **Two-phase Wi-Fi RSSI fingerprinting system for deterministic indoor localization across the GUC C3 building using nearest-neighbor RMS distance matching.**
 
-[![Language](https://img.shields.io/badge/Language-MATLAB-blue?style=flat-square)](https://www.mathworks.com/products/matlab.html)
-[![Method](https://img.shields.io/badge/Method-RSSI%20Fingerprinting-orange?style=flat-square)]()
-[![Location](https://img.shields.io/badge/Location-GUC%20C3%20Building-green?style=flat-square)]()
+[![MATLAB](https://img.shields.io/badge/Language-MATLAB-orange.svg)](https://www.mathworks.com/)
+[![Domain](https://img.shields.io/badge/Domain-Indoor_Positioning-blue.svg)]()
 
 ---
 
 ## Overview
 
-This project implements a **location fingerprinting technique** for accurate indoor positioning using Wi-Fi signal strength (RSSI) measurements. Traditional GPS is ineffective indoors due to signal attenuation, making RSSI-based fingerprinting a critical technique for indoor navigation, asset tracking, and emergency response.
-
-The system localizes a receiver anywhere on the **2nd floor of the C3 building at the German University in Cairo (GUC)** by comparing live RSSI measurements from **5 WLAN Access Points** against a pre-recorded radio map of reference points.
+This project implements a complete **Wi-Fi fingerprinting-based indoor positioning system** for the German University in Cairo (GUC) C3 building. The system determines a user's location inside a building using only the Wi-Fi signal strengths (RSSI) from existing access points — no GPS, no additional hardware required.
 
 ---
 
-## Methodology
+## System Architecture
 
-### Phase 1: Offline Training (Radio Map Construction)
-
-```
-[Define Reference Grid on Floor Plan]
-              |
-              v
-   [Measure RSSI from 5 APs at each reference point]
-   AP1_power, AP2_power, AP3_power, AP4_power, AP5_power
-              |
-              v
-   [Store as Radio Map: (x, y) → [P1, P2, P3, P4, P5]]
-```
-
-### Phase 2: Online Localization
+### Phase 1: Offline — Radio Map Construction
 
 ```
-[Receive live RSSI from 5 APs at unknown location]
-              |
-              v
-   [Compute RMS distance to each reference point]
-   RMS = sqrt( Σ(P_ref_i - P_live_i)^2 / N )
-              |
-              v
-   [Select reference point with minimum RMS distance]
-              |
-              v
-   [Output: (x, y) coordinates of estimated location]
+Surveyed Grid Points (known coordinates)
+          │
+  Measure RSSI from 5 APs at each point
+  (multiple measurements for averaging)
+          │
+  Build Radio Map:
+  Location (x,y) → [RSSI_AP1, RSSI_AP2, RSSI_AP3, RSSI_AP4, RSSI_AP5]
+          │
+  Store in fingerprint database
+```
+
+### Phase 2: Online — Real-Time Localization
+
+```
+Live RSSI Vector from 5 APs
+          │
+  Compute RMS distance to every reference point:
+  d(p) = sqrt( mean( (RSSI_live - RSSI_ref[p])^2 ) )
+          │
+  Select point with minimum RMS distance
+          │
+  Return (x, y) coordinates
 ```
 
 ---
 
 ## Technical Details
 
-### RMS-Based Nearest Neighbor Matching
-The core localization algorithm computes the **Root Mean Square (RMS) error** between the live received power vector and each fingerprint in the radio map. The reference point with the lowest RMS distance is selected as the estimated location.
+### RSSI Distance Metric
 
-**Formula:**
+The **Root Mean Square (RMS)** distance between a live reading and a reference fingerprint:
+
 ```
-RMS(i) = sqrt( (1/5) * sum_j (P_ref_ij - P_live_j)^2 )
+d = sqrt( (1/N) * sum_{i=1}^{N} (RSSI_live_i - RSSI_ref_i)^2 )
 ```
-Where `P_ref_ij` is the power from AP `j` at reference point `i`, and `P_live_j` is the live power from AP `j`.
 
-### Access Points
-| AP | Coverage Zone |
+Where N = 5 (number of access points). This is a deterministic approach — no probabilistic models or ML required.
+
+### Building Layout
+
+| Parameter | Value |
 |---|---|
-| AP1 | North corridor |
-| AP2 | East wing |
-| AP3 | South corridor |
-| AP4 | West wing |
-| AP5 | Central area |
+| Building | GUC C3 Building |
+| Access Points | 5 Wi-Fi APs |
+| Grid resolution | ~1.5m spacing |
+| RSSI range | -30 dBm (strong) to -90 dBm (weak) |
+
+### Why RSSI Fingerprinting?
+
+| Method | Accuracy | Infrastructure Needed |
+|---|---|---|
+| GPS | ~3m (outdoors only) | Satellite line-of-sight |
+| Trilateration | ~5-10m | Path-loss model calibration |
+| **Fingerprinting** | **~1-3m** | Only existing Wi-Fi APs |
+| UWB | ~0.1m | Dedicated UWB anchors |
 
 ---
 
-## System Specifications
+## MATLAB Implementation
 
-| Property | Value |
-|---|---|
-| Building | GUC C3, Floor 2 |
-| Access Points | 5 WLAN APs |
-| Algorithm | RMS nearest-neighbor fingerprinting |
-| Output | (x, y) coordinates on floor grid |
-| Platform | MATLAB |
+```matlab
+% Load radio map
+load('radio_map.mat');  % [N_points x 5] RSSI matrix + coordinates
 
----
+% Live measurement
+rssi_live = [-65, -72, -58, -81, -69];  % dBm from 5 APs
 
-## Getting Started
+% RMS distance to all reference points
+diffs = radio_map.rssi - rssi_live;     % broadcasting
+rms_dist = sqrt(mean(diffs.^2, 2));     % per-point RMS
 
-### Prerequisites
-- MATLAB R2016b or later
-- Communications Toolbox (optional, for signal visualization)
-
-### Running
-1. Open MATLAB and navigate to the project directory
-2. Load the radio map data (reference power measurements)
-3. Run the main localization script:
-   ```matlab
-   run('fingerprinting_main.m')
-   ```
-4. Enter the live RSSI values when prompted
-5. The estimated (x, y) coordinates are displayed
+% Nearest neighbor
+[~, idx] = min(rms_dist);
+estimated_pos = radio_map.coords(idx, :);
+fprintf('Estimated position: (%.1f, %.1f) m\n', estimated_pos(1), estimated_pos(2));
+```
 
 ---
 
-## Skills Demonstrated
+## Installation
 
-- **Signal Processing:** RSSI measurement, path loss modeling, wireless channel characterization
-- **Indoor Positioning:** Radio map construction, fingerprinting, nearest-neighbor matching
-- **MATLAB:** Matrix operations, distance computation, data visualization
-- **Applied Mathematics:** RMS error metric, vector space comparison
-- **Wireless Networks:** WLAN (802.11) signal propagation, multi-AP localization
+```bash
+git clone https://github.com/tamer017/fingerprinting.git
+cd fingerprinting
+# Open in MATLAB R2020b+
+# Run: main.m
+```
 
 ---
 
-## References
+## Skills & Concepts
 
-- Bahl, P. & Padmanabhan, V.N. (2000). *RADAR: An in-building RF-based user location and tracking system*. IEEE INFOCOM.
-- Youssef, M. & Agrawala, A. (2005). *The Horus WLAN location determination system*. ACM MobiSys.
+`RSSI Fingerprinting` `Indoor Positioning` `WLAN` `Wi-Fi Localization` `MATLAB` `Signal Processing` `Nearest Neighbor Search` `RMS Distance` `Radio Map` `Location-Based Services`
+
+---
+
+## Author
+
+**Ahmed Tamer Assy** — [GitHub](https://github.com/tamer017) | Machine Learning Researcher @ Volkswagen AG
