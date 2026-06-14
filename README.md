@@ -4,12 +4,15 @@
 
 [![MATLAB](https://img.shields.io/badge/Language-MATLAB-orange.svg)](https://www.mathworks.com/)
 [![Domain](https://img.shields.io/badge/Domain-Indoor_Positioning-blue.svg)]()
+[![Location](https://img.shields.io/badge/Location-GUC%20C3%20Building-green?style=flat-square)]()
 
 ---
 
 ## Overview
 
-This project implements a complete **Wi-Fi fingerprinting-based indoor positioning system** for the German University in Cairo (GUC) C3 building. The system determines a user's location inside a building using only the Wi-Fi signal strengths (RSSI) from existing access points — no GPS, no additional hardware required.
+This project implements a complete **Wi-Fi fingerprinting-based indoor positioning system** for the German University in Cairo (GUC) C3 building. The system determines a user’s location inside a building using only the Wi-Fi signal strengths (RSSI) from existing access points — no GPS, no additional hardware required.
+
+The system localizes a receiver anywhere on the **2nd floor of the C3 building at GUC** by comparing live RSSI measurements from **5 WLAN Access Points** against a pre-recorded radio map of reference points.
 
 ---
 
@@ -56,22 +59,34 @@ d = sqrt( (1/N) * sum_{i=1}^{N} (RSSI_live_i - RSSI_ref_i)^2 )
 
 Where N = 5 (number of access points). This is a deterministic approach — no probabilistic models or ML required.
 
+### Access Points
+
+| AP | Coverage Zone |
+|---|---|
+| AP1 | North corridor |
+| AP2 | East wing |
+| AP3 | South corridor |
+| AP4 | West wing |
+| AP5 | Central area |
+
 ### Building Layout
 
 | Parameter | Value |
 |---|---|
-| Building | GUC C3 Building |
+| Building | GUC C3 Building, Floor 2 |
 | Access Points | 5 Wi-Fi APs |
 | Grid resolution | ~1.5m spacing |
 | RSSI range | -30 dBm (strong) to -90 dBm (weak) |
+| Algorithm | RMS nearest-neighbor fingerprinting |
+| Platform | MATLAB |
 
 ### Why RSSI Fingerprinting?
 
 | Method | Accuracy | Infrastructure Needed |
 |---|---|---|
 | GPS | ~3m (outdoors only) | Satellite line-of-sight |
-| Trilateration | ~5-10m | Path-loss model calibration |
-| **Fingerprinting** | **~1-3m** | Only existing Wi-Fi APs |
+| Trilateration | ~5–10m | Path-loss model calibration |
+| **Fingerprinting** | **~1–3m** | Only existing Wi-Fi APs |
 | UWB | ~0.1m | Dedicated UWB anchors |
 
 ---
@@ -111,6 +126,13 @@ cd fingerprinting
 ## Skills & Concepts
 
 `RSSI Fingerprinting` `Indoor Positioning` `WLAN` `Wi-Fi Localization` `MATLAB` `Signal Processing` `Nearest Neighbor Search` `RMS Distance` `Radio Map` `Location-Based Services`
+
+---
+
+## References
+
+- Bahl, P. & Padmanabhan, V.N. (2000). *RADAR: An in-building RF-based user location and tracking system*. IEEE INFOCOM.
+- Youssef, M. & Agrawala, A. (2005). *The Horus WLAN location determination system*. ACM MobiSys.
 
 ---
 
